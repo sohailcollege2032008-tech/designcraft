@@ -3424,7 +3424,9 @@ fn layout_line(
     let ratio = if ratio_n > 0 { ratio_sum / ratio_n as f64 } else { 1.0 };
     let mut out = Vec::with_capacity(line.len());
     let mut x = x0 + offset;
-    let bidi = bidi_info.has_rtl();
+    // has_rtl() only reports RTL *characters*; an RTL paragraph of Latin text (e.g. an InDesign
+    // "<page#> Page" footer in a right-to-left paragraph) must still be reordered visually.
+    let bidi = bidi_info.has_rtl() || bidi_info.paragraphs.iter().any(|p| p.level.is_rtl());
     let mut pens = Vec::with_capacity(if bidi { line.len() } else { 0 });
     for (i, g) in line.iter().enumerate() {
         if bidi {
